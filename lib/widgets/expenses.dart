@@ -13,34 +13,63 @@ class Expenses extends StatefulWidget {
 }
 
 class _ExpensesState extends State<Expenses> {
-  final List<Expense> _reqisteredExpenses = [
-
-  ];
+  final List<Expense> _registeredExpenses = [];
 
   void _addExpense(Expense expense) {
     setState(() {
-      _reqisteredExpenses.add(expense);
+      _registeredExpenses.add(expense);
     });
-  
+  }
+
+  void _removeExpense(Expense expense) {
+    final expenseIndex = _registeredExpenses.indexOf(expense);
+    setState(() {
+      _registeredExpenses.remove(expense);
+    });
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+       SnackBar(
+        duration: const Duration(seconds: 4),
+        content: const Text('Expense deleted.'),
+        action: SnackBarAction(label: 'Undo', onPressed: () {
+          setState(() {
+            _registeredExpenses.insert(expenseIndex, expense);
+          });
+        }),
+      ),
+    );
   }
 
   void _openAddExpenseOveray() {
     showModalBottomSheet(
-      isScrollControlled: true,
-        context: context, builder: (cntx) =>  NewExpense(onAddExpense: _addExpense));
+        isScrollControlled: true,
+        context: context,
+        builder: (cntx) => NewExpense(onAddExpense: _addExpense));
   }
 
   @override
   Widget build(BuildContext context) {
+    Widget mainContent = const Center(
+      child: Text('No expenses found. Try adding some.'),
+    );
+    if (_registeredExpenses.isNotEmpty) {
+      mainContent = ExpensesList(
+          expenses: _registeredExpenses, onRemoveExpense: _removeExpense);
+    }
     return Scaffold(
-        appBar: AppBar(title: const Text('Expense Tracker'), actions: [
-          IconButton(
-              onPressed: _openAddExpenseOveray, icon: const Icon(Icons.add))
-        ]),
-        body: Column(
-          children: [
-            Expanded(child: ExpensesList(expenses: _reqisteredExpenses)),
-          ],
-        ));
+      appBar: AppBar(title: const Text('Expense Tracker'), actions: [
+        IconButton(
+          onPressed: _openAddExpenseOveray,
+          icon: const Icon(Icons.add),
+        )
+      ]),
+      body: Column(
+        children: [
+          Expanded(
+            child: mainContent,
+          )
+        ],
+      ),
+    );
   }
 }
