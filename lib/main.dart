@@ -51,7 +51,7 @@ void main() {
                     fontSize: 15),
               ),
         ),
-        themeMode: ThemeMode.system,
+        themeMode: ThemeMode.light,
         home: const Expenses(),
       ),
     );
